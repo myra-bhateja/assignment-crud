@@ -1,0 +1,259 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Space+Grotesk:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #f7efe2;
+  --ink: #1c1a17;
+  --accent: #0f8a7b;
+  --accent-light: #c8f3ea;
+  --accent-2: #f2a65a;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-border: rgba(28, 26, 23, 0.12);
+  --shadow: 0 20px 40px rgba(28, 26, 23, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(15, 138, 123, 0.14), transparent 45%),
+    radial-gradient(circle at top right, rgba(242, 166, 90, 0.18), transparent 40%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.header h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.4rem, 3vw, 3.2rem);
+  margin: 0;
+}
+
+.header p {
+  max-width: 680px;
+  margin: 0;
+  font-size: 1.05rem;
+  color: rgba(28, 26, 23, 0.8);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.nav button {
+  border: 1px solid transparent;
+  background: var(--panel);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav button.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.nav button:hover {
+  border-color: var(--panel-border);
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+  animation: floatIn 0.6s ease;
+}
+
+.panel + .panel {
+  margin-top: 18px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.tag {
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 16px;
+}
+
+input,
+select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  font-size: 0.95rem;
+  background: white;
+}
+
+button.primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.danger {
+  background: transparent;
+  border: 1px solid rgba(220, 76, 62, 0.4);
+  color: #b94237;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--panel-border);
+  font-size: 0.95rem;
+}
+
+.table th {
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(28, 26, 23, 0.6);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notice {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(242, 166, 90, 0.2);
+  color: #8a4b16;
+  font-weight: 600;
+}
+
+.notice.error {
+  background: rgba(220, 76, 62, 0.18);
+  color: #b94237;
+}
+
+.relationships {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.rel-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--panel-border);
+  padding: 16px;
+}
+
+.rel-card h3 {
+  margin: 0 0 12px;
+}
+
+.rel-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+
+.rel-list li {
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(28, 26, 23, 0.16);
+}
+
+.rel-list li:last-child {
+  border-bottom: none;
+}
+
+.footer-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .nav {
+    gap: 8px;
+  }
+}
