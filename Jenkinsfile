@@ -3,6 +3,10 @@ pipeline {
   options {
     timestamps()
   }
+  environment {
+    DOCKER_CLIENT_TIMEOUT = '300'
+    COMPOSE_HTTP_TIMEOUT = '300'
+  }
   stages {
     stage('Checkout') {
       steps {
@@ -54,12 +58,14 @@ pipeline {
     stage('Docker Compose Up') {
       steps {
         script {
-          if (isUnix()) {
-            sh 'docker compose up -d --build'
-            sh 'docker compose ps'
-          } else {
-            bat 'docker compose up -d --build'
-            bat 'docker compose ps'
+          retry(3) {
+            if (isUnix()) {
+              sh 'docker compose up -d --build'
+              sh 'docker compose ps'
+            } else {
+              bat 'docker compose up -d --build'
+              bat 'docker compose ps'
+            }
           }
         }
       }
