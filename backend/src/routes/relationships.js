@@ -1,6 +1,7 @@
 const express = require('express');
-const Employee = require('../models/Employee');
-const Enrollment = require('../models/Enrollment');
+const Department = require('../models/Department');
+const Student = require('../models/Student');
+const Course = require('../models/Course');
 const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
@@ -8,33 +9,57 @@ const router = express.Router();
 router.get(
   '/department/:id/employees',
   asyncHandler(async (req, res) => {
-    const employees = await Employee.find({ departmentId: req.params.id })
-      .populate('departmentId', 'name')
-      .sort({ name: 1 })
+    const department = await Department.findById(req.params.id)
+      .populate({
+        path: 'employees',
+        select: 'name title departmentId',
+        options: { sort: { name: 1 } }
+      })
       .lean();
-    res.json(employees);
+
+    if (!department) {
+      return res.status(404).json({ message: 'Department not found' });
+    }
+
+    return res.json(department.employees || []);
   })
 );
 
 router.get(
   '/student/:id/courses',
   asyncHandler(async (req, res) => {
-    const enrollments = await Enrollment.find({ studentId: req.params.id })
-      .populate('courseId', 'name code')
+    const student = await Student.findById(req.params.id)
+      .populate({
+        path: 'courses',
+        select: 'name code',
+        options: { sort: { name: 1 } }
+      })
       .lean();
-    const courses = enrollments.map((enrollment) => enrollment.courseId);
-    res.json(courses);
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    return res.json(student.courses || []);
   })
 );
 
 router.get(
   '/course/:id/students',
   asyncHandler(async (req, res) => {
-    const enrollments = await Enrollment.find({ courseId: req.params.id })
-      .populate('studentId', 'name year')
+    const course = await Course.findById(req.params.id)
+      .populate({
+        path: 'students',
+        select: 'name year',
+        options: { sort: { name: 1 } }
+      })
       .lean();
-    const students = enrollments.map((enrollment) => enrollment.studentId);
-    res.json(students);
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    return res.json(course.students || []);
   })
 );
 

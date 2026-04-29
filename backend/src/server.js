@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const connectDb = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
-const { seedIfNeeded } = require('./seed/seed');
+const { seedIfNeeded, syncRelationshipArrays } = require('./seed/seed');
 
 const departmentsRoutes = require('./routes/departments');
 const employeesRoutes = require('./routes/employees');
@@ -44,6 +44,8 @@ const startServer = async () => {
     if (seedOnStart) {
       await seedIfNeeded();
     }
+
+    await syncRelationshipArrays();
 
     app.listen(port, () => {
       console.log(`API listening on port ${port}`);

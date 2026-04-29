@@ -5,10 +5,71 @@ const Student = require('../models/Student');
 const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
 
+const pushToMap = (map, key, value) => {
+  const keyText = String(key);
+  if (!map.has(keyText)) {
+    map.set(keyText, []);
+  }
+  map.get(keyText).push(value);
+};
+
+const syncRelationshipArrays = async () => {
+  const [departments, employees, students, courses, enrollments] = await Promise.all([
+    Department.find().select('_id').lean(),
+    Employee.find().select('_id departmentId').lean(),
+    Student.find().select('_id').lean(),
+    Course.find().select('_id').lean(),
+    Enrollment.find().select('studentId courseId').lean()
+  ]);
+
+  if (departments.length) {
+    const employeesByDepartment = new Map();
+    employees.forEach((employee) => {
+      if (employee.departmentId) {
+        pushToMap(employeesByDepartment, employee.departmentId, employee._id);
+      }
+    });
+
+    await Promise.all(
+      departments.map((department) =>
+        Department.findByIdAndUpdate(department._id, {
+          employees: employeesByDepartment.get(String(department._id)) || []
+        })
+      )
+    );
+  }
+
+  if (students.length || courses.length) {
+    const coursesByStudent = new Map();
+    const studentsByCourse = new Map();
+
+    enrollments.forEach((enrollment) => {
+      if (enrollment.studentId && enrollment.courseId) {
+        pushToMap(coursesByStudent, enrollment.studentId, enrollment.courseId);
+        pushToMap(studentsByCourse, enrollment.courseId, enrollment.studentId);
+      }
+    });
+
+    await Promise.all([
+      ...students.map((student) =>
+        Student.findByIdAndUpdate(student._id, {
+          courses: coursesByStudent.get(String(student._id)) || []
+        })
+      ),
+      ...courses.map((course) =>
+        Course.findByIdAndUpdate(course._id, {
+          students: studentsByCourse.get(String(course._id)) || []
+        })
+      )
+    ]);
+  }
+};
+
 const seedIfNeeded = async () => {
   const departmentCount = await Department.countDocuments();
   if (departmentCount > 0) {
-    return { seeded: false };
+    await syncRelationshipArrays();
+    return { seeded: false, synced: true };
   }
 
   const departments = await Department.insertMany([
@@ -19,7 +80,7 @@ const seedIfNeeded = async () => {
 
   const [engineering, design, operations] = departments;
 
-  await Employee.insertMany([
+  const employees = await Employee.insertMany([
     { name: 'Aanya Rao', title: 'Frontend Engineer', departmentId: engineering._id },
     { name: 'Kabir Singh', title: 'Backend Engineer', departmentId: engineering._id },
     { name: 'Meera Joshi', title: 'Product Designer', departmentId: design._id },
@@ -38,11 +99,49 @@ const seedIfNeeded = async () => {
     { name: 'Cloud Fundamentals', code: 'CLD150' }
   ]);
 
-  await Enrollment.insertMany([
+  const enrollments = await Enrollment.insertMany([
     { studentId: students[0]._id, courseId: courses[0]._id },
     { studentId: students[0]._id, courseId: courses[1]._id },
     { studentId: students[1]._id, courseId: courses[1]._id },
     { studentId: students[2]._id, courseId: courses[2]._id }
+  ]);
+
+  const employeesByDepartment = new Map();
+  employees.forEach((employee) => {
+    if (employee.departmentId) {
+      pushToMap(employeesByDepartment, employee.departmentId, employee._id);
+    }
+  });
+
+  await Promise.all(
+    departments.map((department) =>
+      Department.findByIdAndUpdate(department._id, {
+        employees: employeesByDepartment.get(String(department._id)) || []
+      })
+    )
+  );
+
+  const coursesByStudent = new Map();
+  const studentsByCourse = new Map();
+
+  enrollments.forEach((enrollment) => {
+    if (enrollment.studentId && enrollment.courseId) {
+      pushToMap(coursesByStudent, enrollment.studentId, enrollment.courseId);
+      pushToMap(studentsByCourse, enrollment.courseId, enrollment.studentId);
+    }
+  });
+
+  await Promise.all([
+    ...students.map((student) =>
+      Student.findByIdAndUpdate(student._id, {
+        courses: coursesByStudent.get(String(student._id)) || []
+      })
+    ),
+    ...courses.map((course) =>
+      Course.findByIdAndUpdate(course._id, {
+        students: studentsByCourse.get(String(course._id)) || []
+      })
+    )
   ]);
 
   return { seeded: true };
@@ -66,4 +165,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { seedIfNeeded };
+module.exports = { seedIfNeeded, syncRelationshipArrays };

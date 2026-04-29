@@ -1,6 +1,7 @@
 const express = require('express');
 const Course = require('../models/Course');
 const Enrollment = require('../models/Enrollment');
+const Student = require('../models/Student');
 const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
@@ -44,12 +45,14 @@ router.delete(
   '/:id',
   asyncHandler(async (req, res) => {
     const courseId = req.params.id;
-    await Enrollment.deleteMany({ courseId });
-    const removed = await Course.findByIdAndDelete(courseId).lean();
-
-    if (!removed) {
+    const existing = await Course.findById(courseId).lean();
+    if (!existing) {
       return res.status(404).json({ message: 'Course not found' });
     }
+
+    await Enrollment.deleteMany({ courseId });
+    await Student.updateMany({ courses: courseId }, { $pull: { courses: courseId } });
+    await Course.findByIdAndDelete(courseId).lean();
 
     return res.json({ ok: true });
   })
